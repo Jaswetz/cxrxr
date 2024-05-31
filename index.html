@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+            }
+        }
+        html {
+            -webkit-user-select: none; /* Disable text selection */
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent; /* Disable tap highlight */
+        }
+        #cursor {
+            position: absolute;
+            display: none;
+            z-index: 1000;
+        }  
+        #rectangle {
+            position: absolute;
+            border: 2px solid #0696D7;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <svg id="cursor" width="87" height="87" viewBox="0 0 87 87" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line y1="43.5" x2="38" y2="43.5" stroke="black"/>
+        <line x1="49" y1="43.5" x2="87" y2="43.5" stroke="black"/>
+        <line x1="43.5" y1="38" x2="43.5" y2="2.18557e-08" stroke="black"/>
+        <line x1="43.5" y1="87" x2="43.5" y2="49" stroke="black"/>
+        <rect x="38.5" y="38.5" width="10" height="10" stroke="black"/>
+        </svg>
+        
+    <div id="rectangle"></div>
+
+<script>
+    var cursor = document.getElementById('cursor');
+    var rectangle = document.getElementById('rectangle');
+    var start = null;
+    var secondTap = false;
+    var tapCount = 0;
+    var tapTimeout = null;
+
+
+    document.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        clearTimeout(tapTimeout);
+        tapCount++;
+
+        if (tapCount === 2) {
+            cursor.style.top = (e.touches[0].clientY - 100) + 'px';
+            cursor.style.left = (e.touches[0].clientX - 50) + 'px';
+            cursor.style.display = 'block';
+        }
+
+        if (e.touches.length > 1) {
+            if (start) {
+                if (secondTap) {
+                    rectangle.style.display = 'none';
+                    start = null;
+                    secondTap = false;
+                } else {
+                    secondTap = true;
+                }
+            } else {
+                start = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+                rectangle.style.left = start.x + 'px';
+                rectangle.style.top = start.y + 'px';
+                rectangle.style.display = 'block';
+            }
+        }
+    });
+
+    document.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        cursor.style.top = (e.touches[0].clientY - 100) + 'px';
+        cursor.style.left = (e.touches[0].clientX - 50) + 'px';
+    
+        if (start && !secondTap) {
+            rectangle.style.width = (e.touches[0].clientX - start.x - 8) + 'px';
+            rectangle.style.height = (e.touches[0].clientY - start.y - 58) + 'px';
+        }
+    });
+
+    document.addEventListener('touchend', function(e) {
+        e.preventDefault();
+
+        if (tapCount < 2) {
+            tapTimeout = setTimeout(function() {
+                tapCount = 0;
+            }, 300); // 300ms delay to wait for possible second tap
+        } else if (tapCount === 2) {
+            cursor.style.display = 'none';
+            tapCount = 0;
+        }
+
+        if (e.touches.length === 0) {
+            cursor.style.display = 'none';
+        }
+
+        // If secondTap is true, change the border color of the rectangle
+        if (secondTap) {
+            rectangle.style.background = 'rgba(6, 150, 215, 0.2)'; // Change this to your desired color
+        }
+    });
+
+    
+
+    // Prevent page refresh on drag
+    window.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+    }, { passive: false }); // Use passive: false to make the preventDefault() call effective
+
+</script>
+</body>
+</html>
