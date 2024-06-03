@@ -2,6 +2,14 @@
 <html>
 <head>
     <style>
+
+        /* A simple CSS reset that removes the default margin, padding, and border of all elements */
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
         @supports (-webkit-touch-callout: none) {
             body {
                 -webkit-user-select: none;
@@ -23,10 +31,46 @@
             border: 2px solid #0696D7;
             display: none;
         }
+
+/* CSS */
+#grid-container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: auto;
+    z-index: 0;
+  }
+  
+  .grid-item {
+    position: absolute;
+    border: 1px solid rgba(203, 203, 203, 0.20);
+    box-sizing: border-box;
+    z-index: 0;
+  }
+  
+  .grid-item.thick-right {
+    border-right-width: 2px;
+    z-index: 0;
+    
+  }
+  
+  .grid-item.thick-bottom {
+    border-bottom-width: 2px;
+    z-index: 0;
+  }
+
+  .middle-vertical {
+    border-right-color: green !important;
+    z-index: 100;
+}
+
+.middle-horizontal {
+    border-bottom-color: red !important;
+    z-index: 100;
+}
     </style>
 </head>
 <body>
-    <h4>Tap, tap + hold</h4>
     <svg id="cursor" width="87" height="87" viewBox="0 0 87 87" fill="none" xmlns="http://www.w3.org/2000/svg">
         <line y1="43.5" x2="38" y2="43.5" stroke="black"/>
         <line x1="49" y1="43.5" x2="87" y2="43.5" stroke="black"/>
@@ -36,6 +80,10 @@
         </svg>
         
     <div id="rectangle"></div>
+
+
+    <div id="grid-container"></div>
+
 
 <script>
     var cursor = document.getElementById('cursor');
@@ -68,8 +116,8 @@
                 }
             } else {
                 start = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-                rectangle.style.left = start.x + 'px';
-                rectangle.style.top = start.y + 'px';
+                rectangle.style.left = start.x - 8 +'px';
+                rectangle.style.top = start.y - 58 + 'px';
                 rectangle.style.display = 'block';
             }
         }
@@ -81,8 +129,8 @@
         cursor.style.left = (e.touches[0].clientX - 50) + 'px';
     
         if (start && !secondTap) {
-            rectangle.style.width = (e.touches[0].clientX - start.x - 8) + 'px';
-            rectangle.style.height = (e.touches[0].clientY - start.y - 58) + 'px';
+            rectangle.style.width = (e.touches[0].clientX - start.x) + 'px';
+            rectangle.style.height = (e.touches[0].clientY - start.y) + 'px';
         }
     });
 
@@ -115,6 +163,29 @@
         e.preventDefault();
     }, { passive: false }); // Use passive: false to make the preventDefault() call effective
 
+    // JavaScript
+    window.onload = function() {
+        const gridContainer = document.getElementById('grid-container');
+        const squareSize = Math.floor(Math.min(window.innerWidth, window.innerHeight) / 35);
+        const squaresPerRow = Math.floor(window.innerWidth / squareSize);
+        const squaresPerColumn = Math.floor(window.innerHeight / squareSize);
+
+        for (let y = 0; y < squaresPerColumn; y++) {
+            for (let x = 0; x < squaresPerRow; x++) {
+                const div = document.createElement('div');
+                div.classList.add('grid-item');
+                if ((x + 1) % 5 === 0) div.classList.add('thick-right');
+                if ((y + 1) % 5 === 0) div.classList.add('thick-bottom');
+                if (x === Math.floor(squaresPerRow / 2)) div.classList.add('middle-vertical');
+                if (y === Math.floor(squaresPerColumn / 2)) div.classList.add('middle-horizontal');
+                div.style.width = `${squareSize}px`;
+                div.style.height = `${squareSize}px`;
+                div.style.left = `${x * squareSize}px`;
+                div.style.top = `${y * squareSize}px`;
+                gridContainer.appendChild(div);
+            }
+        }
+    };
 </script>
 </body>
 </html>
